@@ -2,25 +2,48 @@ import React, { useState } from 'react';
 
 const TodoForm = ({ onAdd }) => {
   const [text, setText] = useState('');
+  const [adding, setAdding] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
-    onAdd(text);
-    setText('');
+    setAdding(true);
+    try {
+      await onAdd(text.trim());
+      setText('');
+    } catch {
+      // error already shown by parent
+    } finally {
+      setAdding(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
+    <form onSubmit={handleSubmit} className="todo-form">
       <input
+        id="todo-input"
         type="text"
-        placeholder="Enter a task"
+        className="todo-input"
+        placeholder="What needs to be done?"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        style={{ padding: '0.5rem', width: '70%' }}
+        disabled={adding}
+        autoComplete="off"
       />
-      <button type="submit" style={{ padding: '0.5rem', marginLeft: '0.5rem' }}>
-        Add
+      <button
+        id="add-todo-btn"
+        type="submit"
+        className="btn-add"
+        disabled={adding || !text.trim()}
+      >
+        {adding ? (
+          <>
+            <span className="loading-spinner" />
+            Adding…
+          </>
+        ) : (
+          '+ Add Task'
+        )}
       </button>
     </form>
   );
